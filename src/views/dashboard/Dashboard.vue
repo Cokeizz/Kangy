@@ -18,6 +18,17 @@
   />
 </CForm>
       </div>
+      <div class="mt-5">
+        <h1 class="">Ace charge/Card?</h1><br>
+        <CForm>
+  <CFormInput
+  v-model="ace"
+    type="number"
+    placeholder=""
+    text="Must be more than 0$ per round"
+  />
+</CForm>
+      </div>
       <CButton style="width: 100%;" @click="saveState0()" class="mt-4" color="primary">Confirm</CButton>
     </div>
 
@@ -67,6 +78,12 @@
       <CModalTitle>Pay to {{ playername[winner] }}</CModalTitle>
     </CModalHeader>
     <CModalBody>
+      <div v-if="ace !== null && ace > 0" class="">
+      <CButton @click="addAce(this.ace)" class="m-1" color="warning" style="color: white;">{{ aceToggled }} Ace</CButton>
+      <CButton @click="clearAce()" class="m-1" color="danger" style="color: white;">Clear</CButton>
+      </div>
+      
+
       <template v-for="i in parseInt(numberOfPlayer)">
         <div v-if="i-1 !== winner" class="col-sm-12 col-md-6 p-3">
             <div class="player-card p-3">
@@ -113,6 +130,8 @@ export default {
       currentState:'0',
       numberOfPlayer:2,
       charge:1,
+      aceToggled:0,
+      ace:0,
       playername: new Array(),
       columns: [
           {
@@ -138,6 +157,7 @@ export default {
     this.currentState = localStorage.getItem("CurrentState") || '0'
     this.numberOfPlayer =  parseInt(localStorage.getItem("NumberOfPlayer")) || 2
     this.charge =  parseFloat(localStorage.getItem("Charge")) || null
+    this.ace =  parseFloat(localStorage.getItem("Ace")) || null
     this.activeButton = this.numberOfPlayer
     this.playername = JSON.parse(localStorage.getItem("PlayerName")) || new Array()
     this.dataMetric = JSON.parse(localStorage.getItem("DataMetric")) || null
@@ -145,10 +165,23 @@ export default {
     this.checkboxModel = JSON.parse(localStorage.getItem("CheckboxModel")) || null
     localStorage.setItem("coreui-free-vue-admin-template-theme","dark") //light
     const { colorMode, setColorMode } = useColorModes('coreui-free-vue-admin-template-theme')
+    document.title = "Kangy"
   },
   computed:{    
   },
   methods:{
+    addAce(value){
+      if(this.aceToggled <=3){
+        this.aceToggled += 1
+        for (let index = 0; index < this.inputModel.length; index++) {
+        this.inputModel[index] = this.inputModel[index] + parseFloat(value)
+        }
+      }
+    },
+    clearAce(){
+      this.inputModel = JSON.parse(localStorage.getItem("InputModel"))
+      this.aceToggled = 0
+    },
     decrementInput(index) {
     if (this.inputModel[index] > 1) {
       this.inputModel[index]--;
@@ -162,6 +195,7 @@ export default {
         alert('Invalid Charge')
       }else{
         localStorage.setItem("Charge",this.charge)
+        localStorage.setItem("Ace",this.ace)
         let data = []
         let model = []
         let checkbox = []
@@ -182,6 +216,7 @@ export default {
 
         this.checkboxModel = checkbox
         this.inputModel = model
+        window.pageYOffset = 0
         this.currentState = '1'
       }
      
@@ -223,6 +258,7 @@ export default {
       console.log(this.checkboxModel)
       this.checkboxModel = JSON.parse(localStorage.getItem("CheckboxModel"))
       this.inputModel = JSON.parse(localStorage.getItem("InputModel"))
+      this.aceToggled = 0
       this.winner = i
       this.showModal = true
     },
